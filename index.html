@@ -7,11 +7,38 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Web Components</title>
     <script src="tooltip.js"></script>
+    <script src="confirm-link.js"></script>
+
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        :root{
+            --color-primary: blue;
+            font-family: sans-serif;
+        }
+
+        rs-tooltip{
+            font-family: monospace
+        }
+       
+    </style>
 </head>
 
 <body>
-    <p><rs-tooltip text="Texto passado de fora para o tooltip!">Web component com tooltip!</rs-tooltip></p>
-    <rs-tooltip>Outro Web component</rs-tooltip>
+    <p class="exemplo">
+        <span class="teste">
+            <rs-tooltip text="Texto passado de fora para o tooltip!">
+                <span class="highlight">Web component</span>
+            </rs-tooltip> com tooltip root-context styled!
+        </span>
+    </p>
+    <rs-tooltip class="important"></rs-tooltip> style with important class 
+    <br/>
+    <rs-tooltip></rs-tooltip> normal 
+
+    <div>Não herda estilos do web component</div>
+    <a is="rs-a" href="htts://www.google.com.br">go to Google</a>
 </body>
 
 </html>
