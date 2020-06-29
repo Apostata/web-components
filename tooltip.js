@@ -1,7 +1,7 @@
 class Tooltip extends HTMLElement {
     constructor(){
         super();
-        this._tooltipContainer;
+        this._visible = false;
         this._tooltipIcon;
         this.attachShadow({mode:'open'});
 
@@ -27,6 +27,7 @@ class Tooltip extends HTMLElement {
                     background-color: white;
                     padding: 5px;
                     line-height: 35px;
+                    position: relative;
                 }
 
                 :host(.important){
@@ -77,7 +78,7 @@ class Tooltip extends HTMLElement {
         this._tooltipIcon = this.shadowRoot.querySelector('span');
         this._tooltipIcon.addEventListener('mouseenter', this._showTooltip);
         this._tooltipIcon.addEventListener('mouseleave', this._removeTooltip);
-        this.style.position = 'relative';
+        //this._render();
     }
 
     attributeChangedCallback(attribute, oldValue, value){
@@ -92,14 +93,25 @@ class Tooltip extends HTMLElement {
         this._tooltipIcon.removeEventListener('mouseleave', this._removeTooltip);
     }
 
+    _render(){
+        let tooltipContainer = this.shadowRoot.querySelector('div');
+        if(this._visible){
+            tooltipContainer = document.createElement('div');
+            tooltipContainer.textContent = this._text ;
+            this.shadowRoot.appendChild(tooltipContainer);
+        } else {
+            if(tooltipContainer) this.shadowRoot.removeChild(tooltipContainer);
+        }
+    }
+
     _showTooltip =()=>{ // _metodo = indica que é só sera chamado dentro da classe
-        this._tooltipContainer = document.createElement('div');
-        this._tooltipContainer.textContent = this._text ;
-        this.shadowRoot.appendChild(this._tooltipContainer);
+       this._visible = true;
+       this._render();
     }
 
     _removeTooltip=()=>{
-        this.shadowRoot.removeChild(this._tooltipContainer);
+        this._visible = false;
+        this._render();
     }    
 }
 
