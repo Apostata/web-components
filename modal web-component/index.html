@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Modal web-component</title>
+        
+    <script  src="modal.js"></script>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+
+        body{
+            margin: 2rem;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <p>Modal test</p>
+    <button type="button">Show Modal</button>
+    <rs-modal>
+        <h1 slot="title">Título vindo do light-DOM</h1>
+        <p>Conteúdo do modal</p>
+    </rs-modal>
+
+    <script>
+        const modalButton = document.querySelector('button');
+        const rsModal = document.querySelector('rs-modal');
+        modalButton.addEventListener('click',function(e){
+            rsModal.open();
+        });
+
+        rsModal.addEventListener('modal-close', function(event){
+            console.log('modal closed!')
+        });
+
+        rsModal.addEventListener('modal-confirm', function(event){
+            console.log('modal confirmed!')
+        })
+    </script>
+</body>
+</html>

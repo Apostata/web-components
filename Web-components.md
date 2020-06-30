@@ -280,3 +280,221 @@ Os estilos do Light-DOM **sempre** sobrepõe os do shadow-DOM.
 
 ##### :host()
 host também aceita um seletor, como por exemplo `:host(.important)`, só estilizara o componente se ele tiver a classe important. Assim como slotted, aceita tags, classes, ids e etc.
+
+## using multiple slots
+
+no web-component:
+
+````
+class Modal extends HTMLElement {
+    constructor(){
+        super();
+        this.attachShadow({mode:'open'});
+        this._closeButton;
+        this.isOpened= false;
+        this.shadowRoot.innerHTML = `
+            ...
+            <div id="modal">
+                <header id="modal-header">
+                    <slot name="title"></slot>
+                </header>
+                <section id="modal-content">
+                    <slot></slot>
+                </section>
+                <footer id="modal-footer">
+                    <button id="modal-close">Calcelar</button>
+                    <button>Prosseguir</button>
+                </footer>
+            </div>
+        `;
+    }
+    ...
+}
+````
+basta criar a tag com atributo name: `<slot name="title"></slot>`
+
+no html:
+````
+    ...
+    <rs-modal>
+        <h1 slot="title">Título vindo do light-DOM</h1>
+        <p>Conteúdo do modal</p>
+    </rs-modal>
+    ...
+````
+no html passar a tag que você deseja inserir no slot específico com o atributo slot com o nome do slot do web-component.
+Quando não definido o name do slot, ele ocupará o próximo slot sem atributo name.
+
+**somente os slots com atributo name mostram algum conteúdo padrão caso nada seja enviado à ele.**
+
+### adicionando event listener quando tiver alteração no slot
+
+o Medoto que deve set adicionado no shadowDom é o `slotchange`.
+exemplo:
+
+````
+class Modal extends HTMLElement {
+    constructor(){
+        super();
+        this.attachShadow({mode:'open'});
+        this._closeButton;
+        this.isOpened= false;
+        this.shadowRoot.innerHTML = 
+        `
+            ...
+            <div id="modal">
+                <header id="modal-header">
+                    <slot name="title"><h1>Título</h1></slot>
+                </header>
+                <section id="modal-content">
+                    <slot></slot>
+                </section>
+               ...
+            </div>
+            ...
+        `;
+        const slots = this.shadowRoot.querySelectorAll('slot[name="title"]');
+        slots[0].addEventListener('slotchange', event =>{
+            console.dir(event.target.assignedNodes());
+        })
+    }
+    ...
+}
+````
+
+## passando custom events do Shadow-DOM para o light-DOM
+
+````
+class Modal extends HTMLElement {
+    constructor(){
+        super();
+        this.attachShadow({mode:'open'});
+        this._closeButton;
+        this._confirmButton;
+        this.isOpened= false;
+        this.shadowRoot.innerHTML = 
+        `
+        ...
+            <div id="modal">
+               ...
+                <footer id="modal-footer">
+                    <button id="modal-close">Calcelar</button>
+                    <button id="modal-confirm">Prosseguir</button>
+                </footer>
+            </div>
+        ...
+        `
+    }
+     connectedCallback(){
+        this._closeButton = this.shadowRoot.querySelector('#modal-close');
+        this._closeButton.addEventListener('click', this._cancel);
+
+        this._confirmButton = this.shadowRoot.querySelector('#modal-confirm');
+        this._confirmButton.addEventListener('click', this._confirm);                                                                                             
+    }
+
+    ...
+
+    _cancel = ()=>{
+        const evento =  new Event('modal-close');
+        this.dispatchEvent(evento)
+        this.close();
+    }
+
+    _confirm = ()=>{
+         const evento =  new Event('modal-confirm');
+        this.dispatchEvent(evento)
+        this.close()
+    }
+}
+````
+
+desta maneira, no Light-DOM é necessário escutar os eventos apontando para o web-component:
+````
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   ...
+    <script src="modal.js"></script>
+    ...
+    </style>
+</head>
+<body>
+  ..
+    <rs-modal>
+        <h1 slot="title">Título vindo do light-DOM</h1>
+        <p>Conteúdo do modal</p>
+    </rs-modal>
+
+    <script>
+        const modalButton = document.querySelector('button');
+        const rsModal = document.querySelector('rs-modal');
+        modalButton.addEventListener('click',(e)=>{
+            rsModal.open();
+        });
+
+        rsModal.addEventListener('modal-close', event=>{
+            console.log('modal closed!')
+        });
+
+        rsModal.addEventListener('modal-confirm', event=>{
+            console.log('modal confirmed!')
+        })
+    </script>
+</body>
+</html>
+````
+
+### escutando eventos em qualquer lugar do light-DOM
+````
+class Modal extends HTMLElement {
+    constructor(){
+        super();
+        this.attachShadow({mode:'open'});
+        this._closeButton;
+        this._confirmButton;
+        this.isOpened= false;
+        this.shadowRoot.innerHTML = 
+        `
+        ...
+            <div id="modal">
+               ...
+                <footer id="modal-footer">
+                    <button id="modal-close">Calcelar</button>
+                    <button id="modal-confirm">Prosseguir</button>
+                </footer>
+            </div>
+        ...
+        `
+    }
+     connectedCallback(){
+        this._closeButton = this.shadowRoot.querySelector('#modal-close');
+        this._closeButton.addEventListener('click', this._cancel);
+
+        this._confirmButton = this.shadowRoot.querySelector('#modal-confirm');
+        this._confirmButton.addEventListener('click', this._confirm);                                                                                             
+    }
+
+    ...
+
+    _cancel = (event)=>{
+        const evento = new Event('modal-close',{bubbles:true, composed:true});
+        event.target.dispatchEvent(evento);
+        this.close();
+    }
+
+    _confirm = (event)=>{
+        const evento = new Event('modal-confirm',{bubbles:true, composed:true});
+        event.target.dispatchEvent(evento);
+        this.close()
+    }
+}
+````
+Neste caso ao se clicar nos botões de id `#modal-close` e `#modal-confirm`, ambos disparam eventos para o light-dom através das propriedades definidas no new Event que recebe 2 parâmetros.
+
+1 - o nome do evento customizado, neste caso `modal-close` para o botão cancelar e `modal-confirm` para o botão confirmar.
+2 -  os segundo parametro é um objeto que customiza como o evento se comporta:
+    bubbles(boleano): se true verifica se o próprio elemento que disparou o evento não estiver escutando ele, passará para o elemento pai, e assim por diante.
+    composed(boleano): se true, passa da arvore do shadowDOM para o LightDOM, para que possamos escutar o evento fora do shadowDOM.
+
+Desta maneira inclusive se houver um botão no rodapé da página por exemplo do Light-DOM, este poderá escutar o evento disparado pelo web-component.
