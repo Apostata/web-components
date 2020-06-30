@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+  <title>Stencil Component Starter</title>
+
+  <script type="module" src="/build/stencil-custom-component.esm.js"></script>
+  <script nomodule src="/build/stencil-custom-component.js"></script>
+
+</head>
+<body>
+
+<rs-side-drawer titulo="Meu titulo!"></rs-side-drawer>
+<script>
+  const sideDrawer =  document.querySelector('rs-side-drawer');
+  setTimeout(()=>{
+    sideDrawer.titulo = "novo titulo";                                //muda internamente mas não reflete fora
+    //sideDrawer.setAttribute('titulo', "mudando de fato o attributo"); //muda fora e relfete internamente
+  }, 3000)
+</script>
+</body>
+</html>
