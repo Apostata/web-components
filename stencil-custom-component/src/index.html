@@ -5,15 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>Stencil Component Starter</title>
 
+  <style>
+
+    *{
+      box-sizing: border-box;
+    }
+    body{
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+    }
+
+    .side-nav ul{
+      list-style: none;
+      padding: 1rem 0;
+      margin: 0;
+    }
+
+    .side-nav a{
+      text-decoration: none;
+      color:dimgray;
+      transition: color 300ms ease 0ms;
+      width: 100%;
+      display: block;
+      border-bottom: 1px solid darkgray;
+      padding: 0.5rem 1rem;
+      position: relative;
+    }
+
+    .side-nav a:before{
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      width: 0%;
+      height: 1px;
+      content: "";
+      border-bottom: 1px solid black;
+      transition: all 300ms ease-in-out 0ms;
+    }
+
+    .side-nav a:after{
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      width: 0%;
+      height: 1px;
+      content: "";
+      border-bottom: 1px solid black;
+      transition: all 300ms ease-in-out 0ms;
+    }
+
+    .side-nav a:hover{
+      color:black;
+    }
+
+    .side-nav a:hover:before{
+      width: 50%;
+    }
+
+    .side-nav a:hover:after{
+      width: 50%;
+      left: 0;
+    }
+
+
+    rs-side-drawer + button{
+      position: absolute;
+      top: 15px;
+      right: 250px;
+    }
+
+    rs-side-drawer + button + button{
+      position: absolute;
+      top: 15px;
+      right: 100px;
+    }
+  </style>
+
   <script type="module" src="/build/stencil-custom-component.esm.js"></script>
   <script nomodule src="/build/stencil-custom-component.js"></script>
 
 </head>
 <body>
+<rs-side-drawer titulo="Meu titulo!">
+  <nav class="side-nav">
+    <ul>
+     <li><a href="/">Link 1</a></li>
+     <li><a href="/">Link 2</a></li>
+     <li><a href="/">Link 3</a></li>
+     <li><a href="/">Link 4</a></li>
+    </ul>
+  </nav>
+</rs-side-drawer>
+<button id="openDrawer">Open sideDrawer</button>
+<button id="closeDrawer">Close sideDrawer</button>
 
-<rs-side-drawer titulo="Meu titulo!"></rs-side-drawer>
 <script>
+  const openSideDrawer = document.querySelector('#openDrawer');
+  const closeSideDrawer = document.querySelector('#closeDrawer');
   const sideDrawer =  document.querySelector('rs-side-drawer');
+
+
+  openSideDrawer.addEventListener('click', ()=>{
+    if(!sideDrawer.opened){
+      sideDrawer.open();
+    }
+  });
+
+  closeSideDrawer.addEventListener('click', ()=>{
+    if(sideDrawer.opened){
+      sideDrawer.close();
+    }
+  });
+
+
   setTimeout(()=>{
     sideDrawer.titulo = "novo titulo";                                //muda internamente mas não reflete fora
     //sideDrawer.setAttribute('titulo', "mudando de fato o attributo"); //muda fora e relfete internamente

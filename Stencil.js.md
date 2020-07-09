@@ -46,3 +46,108 @@ export class SideDrawer {
 }
 ````
 Basta passar as configuração de `styleUrl`, apotando para o arquivo de estilo, pode ser sass também. E para usar o shadowDOM, basta passar `shadow:true`
+
+## Recieving and update attributes
+Para receber e atualizar os atrubutos do custom component, basta usar o decorator @Props() no componente:
+
+````
+import {Component, h} from '@stencil/core';
+
+@Component({
+  tag:'rs-side-drawer',
+  styleUrl:'./side-drawer.css',
+  shadow: true
+})
+export class SideDrawer {
+  @Prop({ reflect: true }) titulo :string; 
+
+  render(){
+    return (
+      <aside>
+        <header>
+          <h1>{this.titulo}</h1>
+        </header>
+        <main>
+          <slot />
+        </main>
+      </aside>
+    );
+  }
+}
+````
+Desta maneira, a propriedade `titulo`, recebe um titulo, e qualquer alteração nele, será re-renderizado no metodo render().
+porém não atualizara o proprio atributo na tag do light-DOM, para isso é necessário, configurar @Prop() com o objeto, `{reflect: true}`, para que reflita as alterações para o atributo da tag do custom component.
+
+## Slots
+
+Funcionam da mesma form que no custom component comum.
+
+## Mutable Prop
+Por padrão as props não pode ser alteradas internamente dentro do component, para isso, é necessário setar a propriedade Mutable para true.
+
+````
+...
+  @Prop({ reflect: true, mutable:true }) open :boolean; 
+...
+````
+
+## State
+Quando precisa atualizar um dado apenas dentro do componente, p ideal e usar @State.
+
+````
+@Component({
+  tag:'rs-side-drawer',
+  styleUrl:'./side-drawer.css',
+  shadow: true,
+})
+export class SideDrawer {
+  @State() showContact : boolean = false;
+ ...
+
+  changeTab =(tab: string)=>{
+    this.showContact = tab === 'contact';
+  }
+
+  render(){
+    let mainContent = !this.showContact ?
+    <slot />
+    : (
+      <div id="contactSection">
+       ...
+      </div>
+    )
+    return (
+      <aside>
+        ...
+        <section id="tabs">
+          <button class={!this.showContact?"active":""} onClick={()=>this.changeTab('navigation')}>Navegação</button>
+          <button  class={this.showContact?"active":""} onClick={()=>this.changeTab('contact')} >Contato</button>
+        </section>
+        <main>
+          {mainContent}
+        </main>
+      </aside>
+    );
+  }
+}
+````
+
+## expondo metodos publicos
+
+para expor metodos é necessário usar o decorator @Method além de colocar a função como async
+
+````
+@Component({
+  tag:'rs-side-drawer',
+  styleUrl:'./side-drawer.css',
+  shadow: true,
+})
+export class SideDrawer {
+  @Prop({ reflect: true, mutable: true }) opened : boolean = false;
+  ....
+    @Method()
+    async open(){
+      this.opened = true;
+    }
+}
+````

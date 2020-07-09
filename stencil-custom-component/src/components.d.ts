@@ -7,6 +7,9 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface RsSideDrawer {
+        "close": () => Promise<void>;
+        "open": () => Promise<void>;
+        "opened": boolean;
         "titulo": string;
     }
 }
@@ -23,6 +26,7 @@ declare global {
 }
 declare namespace LocalJSX {
     interface RsSideDrawer {
+        "opened"?: boolean;
         "titulo"?: string;
     }
     interface IntrinsicElements {
